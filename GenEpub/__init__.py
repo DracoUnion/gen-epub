@@ -11,6 +11,7 @@ from os import path
 import jinja2
 from datetime import datetime
 from io import BytesIO
+import zlib
 
 __author__ = "ApacheCN"
 __email__ = "apachecn@163.com"
@@ -93,7 +94,11 @@ def gen_epub_paging(articles, imgs=None, name=None, path=None, limit='100m'):
     if not path.endswith('.epub'):
         path += '.epub'
         
-    total = sum(len(v) for _, v in imgs.items())
+    total = sum(len(v) for _, v in imgs.items()) + \
+            sum(
+                len(zlib.compress((a['title'] + a['content']).encode('utf8')))
+                for a in articles
+            )
     limit = size_str_to_int(limit)
     if total <= limit:
         gen_epub_aio(articles, imgs)
