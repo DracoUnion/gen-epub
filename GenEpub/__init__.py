@@ -24,7 +24,8 @@ d = lambda name: path.join(path.dirname(__file__), name)
 def fname_escape(name):
     return re.sub(r'\\|\/|:|\*|\?|"|<|>|\|', '-', name)
 
-def gen_epub(articles, imgs=None, name=None, path=None):
+
+def gen_epub_aio(articles, imgs=None, name=None, path=None):
     imgs = imgs or {}
     name = name or articles[0]['title']
     path = path or fname_escape(name) + '.epub'
@@ -85,5 +86,51 @@ def gen_epub(articles, imgs=None, name=None, path=None):
     data = bio.getvalue()
     open(path, 'wb').write(data)
     
-    
+def gen_epub_paging(articles, imgs=None, name=None, path=None, limit='100m'):
+    imgs = imgs or {}
+    name = name or articles[0]['title']
+    path = path or fname_escape(name) + '.epub'
+    if not path.endswith('.epub'):
+        path += '.epub'
+        
+    total = sum(len(v) for _, v in imgs.items())
+    limit = size_str_to_int(limit)
+    if total <= limit:
+        gen_epub_aio(articles, imgs)
+        return
+
+    art_part = []
+    img_part = {}
+    total = 0
+    ipt = 1
+    for a in articles:
+        art_imgs = re.findall(r'src="\.\./Images/(\w{32}\.png)"', a['content'])
+        size = sum(
+            len(imgs.get(iname, b'')) 
+            for iname in art_imgs
+        )
+        if total + size >= limit:
+            art_part.insert(0, {
+                'title': f'{name} PT{ipt}',
+                'content': "",
+            })
+            gen_epub_aio(art_part, img_part)
+            art_part = []
+            img_part = {}
+            total = 0
+            ipt += 1
+        art_part.append(a)
+        img_part.update({
+            iname:imgs.get(iname, b'') 
+            for iname in art_imgs
+        })
+        total += size
+    if art_part:
+        art_part.insert(0, {
+            'title': f'{name} PT{ipt}',
+            'content': "",
+        })
+        gen_epub_aio(art_part, img_part)
+
+gen_epub = gen_epub_paging
     
