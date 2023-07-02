@@ -87,7 +87,7 @@ def gen_epub_aio(articles, imgs=None, name=None, path=None):
     data = bio.getvalue()
     open(path, 'wb').write(data)
     
-def gen_epub_paging(articles, imgs=None, name=None, path=None, limit='100m'):
+def gen_epub_paging(articles, imgs=None, name=None, path=None, limit='50m'):
     imgs = imgs or {}
     name = name or articles[0]['title']
     path = path or fname_escape(name) + '.epub'
