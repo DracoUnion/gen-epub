@@ -13,10 +13,10 @@ from datetime import datetime
 from io import BytesIO
 from .util import *
 
-__author__ = "ApacheCN"
-__email__ = "apachecn@163.com"
+__author__ = "wizardforcel"
+__email__ = "wizard.z@qq.com"
 __license__ = "SATA"
-__version__ = "2023.2.23.3"
+__version__ = "2023.7.9.0"
 
 def gen_epub_aio(articles, imgs=None, name=None, path=None):
     imgs = imgs or {}
